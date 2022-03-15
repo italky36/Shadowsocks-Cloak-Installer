@@ -106,7 +106,9 @@ function ShowConnectionInfo() {
 	SERVER_CLOAK_ARGS=$(printf "%s" "$SERVER_CLOAK_ARGS" | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | cut -c 3-) #https://stackoverflow.com/a/10797966/4213397
 	SERVER_BASE64="ss://$SERVER_BASE64@$PUBLIC_IP:$PORT?plugin=$SERVER_CLOAK_ARGS"
 	qrencode -t ansiutf8 "$SERVER_BASE64"
-	echo
+	echo "$SERVER_BASE64" > ~/ss.txt
+        qrencode  -o ~/qr.png "$SERVER_BASE64"
+        echo
 	echo
 	echo "Or just use this string: $SERVER_BASE64"
 }
@@ -714,15 +716,9 @@ elif [[ $distro =~ "Ubuntu" ]]; then
 	fi
 	#Use BBR on user will
 	if ! [ "$(sysctl -n net.ipv4.tcp_congestion_control)" = "bbr" ]; then
-		echo
-		read -r -p "Do you want to use BBR?(y/n) " -e -i "y" OPTION
-		case $OPTION in
-		"y" | "Y")
 			echo 'net.core.default_qdisc=fq' | tee -a /etc/sysctl.conf
 			echo 'net.ipv4.tcp_congestion_control=bbr' | tee -a /etc/sysctl.conf
 			sysctl -p
-			;;
-		esac
 	fi
 elif [[ $distro =~ "Debian" ]] || [[ $distro =~ "Raspbian" ]]; then
 	apt-get -y install iptables-persistent iptables
